@@ -6,6 +6,7 @@ function LoginPage() {
     const [password, setPassword] = useState('');
 
     const handleLogin = async () => {
+        sessionStorage.setItem('auth-token', 'test-token');
         console.log('Inside handleLogin');
     };
 
