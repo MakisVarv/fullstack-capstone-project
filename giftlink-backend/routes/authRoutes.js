@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const connectToDatabase = require('../models/db');
 const dotenv = require('dotenv');
 const pino = require('pino');
+const { body, validationResult } = require('express-validator');
 
 dotenv.config();
 
@@ -99,6 +100,67 @@ router.post('/login', async (req, res) => {
             error: 'Internal server error',
             details: e.message,
         });
+    }
+});
+router.put('/update', async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        logger.error('Validation errors in update request', errors.array());
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+        const email = req.headers.email;
+
+        if (!email) {
+            logger.error('Email not found in the request headers');
+            return res.status(400).json({
+                error: 'Email not found in the request headers',
+            });
+        }
+
+        const db = await connectToDatabase();
+        const collection = db.collection('users');
+
+        const existingUser = await collection.findOne({ email });
+
+        if (!existingUser) {
+            logger.error('User not found');
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const updatedFields = {
+            firstName: req.body.name || existingUser.firstName,
+            updatedAt: new Date(),
+        };
+
+        const updatedUserResult = await collection.findOneAndUpdate(
+            { email },
+            { $set: updatedFields },
+            { returnDocument: 'after' }
+        );
+
+        const updatedUser = updatedUserResult.value || updatedUserResult;
+
+        const payload = {
+            user: {
+                id: updatedUser._id.toString(),
+            },
+        };
+
+        const authtoken = jwt.sign(payload, JWT_SECRET);
+
+        logger.info('User updated successfully');
+
+        res.json({
+            authtoken,
+            name: updatedUser.firstName,
+            email: updatedUser.email,
+        });
+    } catch (error) {
+        logger.error(error);
+        return res.status(500).send('Internal server error');
     }
 });
 

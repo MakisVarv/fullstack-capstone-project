@@ -8,6 +8,8 @@ import LoginPage from './components/LoginPage/LoginPage';
 import RegisterPage from './components/RegisterPage/RegisterPage';
 import DetailsPage from './components/DetailsPage/DetailsPage';
 import SearchPage from './components/SearchPage/SearchPage';
+import ProfilePage from './components/Profile/Profile';
+
 
 function App() {
 
@@ -20,6 +22,7 @@ function App() {
           <Route path="/app/register" element={<RegisterPage />} />
           <Route path="/app/product/:productId" element={<DetailsPage />} />
           <Route path="/" element={<MainPage />} />
+          <Route path="/app/profile" element={<ProfilePage />} />
           <Route path="/app" element={<MainPage />} />
           <Route path="/app/search" element={<SearchPage />} />
         </Routes>
