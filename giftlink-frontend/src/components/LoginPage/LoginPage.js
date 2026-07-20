@@ -1,13 +1,50 @@
 import React, { useState } from 'react';
 import './LoginPage.css';
+import { useNavigate } from 'react-router-dom';
+import { urlConfig } from '../../config';
+import { useAppContext } from '../../context/AuthContext';
 
 function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate();
+    const [error, setError] = useState('');
+    const { setIsLoggedIn } = useAppContext();
 
     const handleLogin = async () => {
-        sessionStorage.setItem('auth-token', 'test-token');
-        console.log('Inside handleLogin');
+        setError('');
+    
+        try {
+            const response = await fetch(`${urlConfig.backendUrl}/api/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
+            });
+    
+            const data = await response.json();
+    
+            if (!response.ok) {
+                setError(data.error || 'Login failed');
+                return;
+            }
+    
+            sessionStorage.setItem('auth-token', data.authtoken);
+            sessionStorage.setItem('name', data.userName);
+            sessionStorage.setItem('email', data.userEmail);
+    
+            console.log('Login successful:', data.userEmail);
+            setIsLoggedIn(true);
+    
+            navigate('/app');
+        } catch (error) {
+            console.error('Login error:', error);
+            setError('Something went wrong. Please try again.');
+        }
     };
 
     return (
@@ -46,8 +83,13 @@ function LoginPage() {
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
-
+                        {error && (
+                                <div className="alert alert-danger" role="alert">
+                                    {error}
+                                </div>
+                        )}
                         <button
+                            type="button"
                             className="btn btn-primary w-100 mb-3"
                             onClick={handleLogin}
                         >

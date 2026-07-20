@@ -8,19 +8,20 @@ export default function Navbar() {
 
   const navigate=useNavigate();
     useEffect(() => {
-        const authTokenFromSession = sessionStorage.getItem('auth-token');
-        const nameFromSession = sessionStorage.getItem('name');
-        if (authTokenFromSession) {
-            if(isLoggedIn && nameFromSession) {
-              setUserName(nameFromSession);
-            } else {
-              sessionStorage.removeItem('auth-token');
-              sessionStorage.removeItem('name');
-              sessionStorage.removeItem('email');
-              setIsLoggedIn(false);
-            }
-        }
-    },[isLoggedIn, setIsLoggedIn, setUserName])
+    const authTokenFromSession = sessionStorage.getItem('auth-token');
+    const nameFromSession = sessionStorage.getItem('name');
+
+    if (authTokenFromSession && nameFromSession) {
+        setIsLoggedIn(true);
+        setUserName(nameFromSession);
+    } else {
+        sessionStorage.removeItem('auth-token');
+        sessionStorage.removeItem('name');
+        sessionStorage.removeItem('email');
+        setIsLoggedIn(false);
+        setUserName('');
+    }
+    }, [setIsLoggedIn, setUserName]);
     const handleLogout=()=>{
         sessionStorage.removeItem('auth-token');
         sessionStorage.removeItem('name');
@@ -35,7 +36,7 @@ export default function Navbar() {
     return (
         <>
             <nav className="navbar navbar-expand-lg navbar-light bg-light" id='navbar_container'>
-        <a className="navbar-brand" href={`${urlConfig.backendUrl}/app`}>GiftLink</a>
+            <a className="nav-link" href="/home.html">GiftLink</a>
 
         <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span className="navbar-toggler-icon"></span>
@@ -70,7 +71,7 @@ export default function Navbar() {
                                     </>
                                 )
 
-                                }
+                }
             </ul>
           </ul>
         </div>
